@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const userLogSchema = mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
     temperatureVal: {
       type: Number,
       required: [true, "Please add a temperature value"],
