@@ -3,5 +3,3 @@ export const notFound = (err, req, res, next) => {
   res.status(404);
   next(error);
 };
-
-export default notFound;
