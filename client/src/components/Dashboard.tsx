@@ -1,18 +1,30 @@
-import { AppListCharts } from "./AppListCharts";
 import { AppTemperatureChart } from "./AppTemperatureChart";
-import { AppGasChart } from "./AppGasChart";
+import { AppSmokeChart } from "./AppSmokeChart";
+import { AppAlcohololChart } from "./AppAlcoholChart";
+import { AppCarbonDioxideChart } from "./AppCarbonDioxideChart";
+import { AppAmmoniaChart } from "./AppAmmoniaChart";
+import { AppTable } from "./AppTable";
+
 const Dashboard = () => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-6 gap-2 auto-rows-min">
-      {/* <AppGasChart /> */}
-      <AppTemperatureChart />
-      {/* <AppGasChart /> */}
-      <AppGasChart maxValue={10000} label={"Smoke"} />
-      <AppGasChart maxValue={500} label={"Alcohol"} />
-      <AppGasChart maxValue={1000} label={"CO2"} />
-      <AppGasChart maxValue={500} label={"Ammonia"} />
-      {/* <AppGasChart /> */}
-    </div>
+    <main className="mt-5 flex flex-col">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 auto-rows-max">
+        <AppTemperatureChart />
+        <AppSmokeChart maxValue={300} label={"Smoke"} />
+        <div className="justify-center">
+          <AppAlcohololChart maxValue={100} label={"Alcohol"} />
+        </div>
+        <div className="justify-center">
+          <AppCarbonDioxideChart maxValue={1000} label={"CO2"} />
+        </div>
+        <div className="justify-center">
+          <AppAmmoniaChart maxValue={200} label={"Ammonia"} />
+        </div>
+      </div>
+      <div className="mt-3 md:mt-0 lg:mt-0">
+        <AppTable />
+      </div>
+    </main>
   );
 };
 

@@ -12,45 +12,81 @@ import {
   ChartTooltip,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useState, useEffect } from "react";
+import { getStatus, getStatusColor } from "@/utils/SensorStatus";
 
 const chartConfig = {
-  visitors: {
-    label: "Temperature",
-  },
-  safari: {
-    label: "Safari",
-    color: "var(--chart-2)",
+  alcohol: {
+    label: "Alcohol",
   },
 } satisfies ChartConfig;
 
-export function AppGasChart({ maxValue, label }) {
-  const value = 20;
-  const percentage = (value / maxValue) * 100;
+interface AppAlcohololChart {
+  maxValue: number;
+  label: string;
+}
+export function AppAlcohololChart({ maxValue, label }: AppAlcohololChart) {
+  const [alcoholVal, setAlcoholValue] = useState(0);
+  const percentage = (alcoholVal / maxValue) * 100;
   const endAngle = (percentage / 100) * 360;
+  const [isLgScreen, setIsLgScreen] = useState(false);
 
-  const chartData = [
-    { browser: "safari", visitors: value, fill: "var(--color-safari)" },
-  ];
+  const status = getStatus(alcoholVal, "alcohol");
+  const statusColor = getStatusColor(status);
+  const chartData = [{ alcohol: alcoholVal, fill: statusColor }];
+
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:8080");
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: "identify", client: "dashboard" }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+
+        if (msg.type === "sensor") {
+          setAlcoholValue(msg.data.alcoholVal);
+        }
+      } catch (err) {
+        console.log("WS JSON ERROR:", err);
+      }
+    };
+
+    return () => ws.close();
+  }, []);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsLgScreen(window.innerWidth >= 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
   return (
     <ChartContainer
       config={chartConfig}
-      className="mx-auto aspect-square max-h-[250px] w-full"
+      className="mx-auto aspect-square max-h-[250px] pb-0"
     >
       <RadialBarChart
         data={chartData}
         startAngle={0}
         endAngle={endAngle}
-        innerRadius={80}
-        outerRadius={140}
+        innerRadius={isLgScreen ? 80 : 76}
+        outerRadius={isLgScreen ? 140 : 132}
       >
         <PolarGrid
           gridType="circle"
           radialLines={false}
           stroke="none"
           className="first:fill-muted last:fill-background"
-          polarRadius={[93, 67]}
+          polarRadius={isLgScreen ? [93, 67] : [90, 64]}
         />
-        <RadialBar dataKey="visitors" background cornerRadius={10} />
+        <RadialBar dataKey="alcohol" background cornerRadius={10} />
         <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
           <Label
             content={({ viewBox }) => {
@@ -67,7 +103,7 @@ export function AppGasChart({ maxValue, label }) {
                       y={viewBox.cy}
                       className="fill-foreground text-4xl font-bold"
                     >
-                      {chartData[0].visitors.toLocaleString()}
+                      {chartData[0].alcohol.toLocaleString()}
                     </tspan>
                     <tspan
                       x={viewBox.cx}

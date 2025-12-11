@@ -1,9 +1,11 @@
 import {
-  Home,
-  ChartNoAxesCombined,
+  CloudMoonRain,
   User,
   LayoutDashboardIcon,
+  HeartPlus,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +14,6 @@ import {
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./ui/sidebar";
@@ -25,11 +26,11 @@ const items = [
     url: "/",
     icon: LayoutDashboardIcon,
   },
-  //   {
-  //     title: "Analytics",
-  //     url: "#",
-  //     icon: ChartNoAxesCombined,
-  //   },
+  // {
+  //   title: "Maintenance",
+  //   url: "/maintenance",
+  //   icon: HeartPlus,
+  // },
 ];
 
 const AppSidebar = () => {
@@ -62,17 +63,21 @@ const AppSidebar = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link to={item.url}>
-                      {" "}
-                      {/* Changed from href to to */}
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
-                  {/* {item.title === "Analytics" && (
-                    <SidebarMenuBadge>23</SidebarMenuBadge>
-                  )} */}
                 </SidebarMenuItem>
               ))}
+              {/* <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <CloudMoonRain />
+                    <Label htmlFor="sleep-mode">Sleep Mode</Label>
+                    <Switch id="sleep-mode" className="mx-8" />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu> */}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -81,7 +86,7 @@ const AppSidebar = () => {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton>
-              <User /> Admin
+              <User /> User
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

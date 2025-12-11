@@ -1,54 +1,52 @@
-import { useState, useEffect } from "react";
-
 import {
   Label,
-  PolarRadiusAxis,
   PolarGrid,
+  PolarRadiusAxis,
   RadialBar,
   RadialBarChart,
 } from "recharts";
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 
+import {
+  ChartContainer,
+  ChartTooltipContent,
+  ChartTooltip,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import { useState, useEffect } from "react";
 import { getStatus, getStatusColor } from "@/utils/SensorStatus";
 
 const chartConfig = {
-  temp: {
-    label: "Temperature",
-  },
-  humid: {
-    label: "Humidity",
+  carbonDioxide: {
+    label: "CO2",
   },
 } satisfies ChartConfig;
-
-export function AppTemperatureChart() {
-  const [temperatureValue, setTemperatureValue] = useState(0);
-  const [humidityValue, setHumidityValue] = useState(0);
-
-  // Get status and color for temperature
-  const tempStatus = getStatus(temperatureValue, "temperature");
-  const tempStatusColor = getStatusColor(tempStatus);
-
-  // Get status and color for humidity
-  const humidStatus = getStatus(humidityValue, "humidity");
-  const humidStatusColor = getStatusColor(humidStatus);
-
-  // Create chart data with separate colors
-  const chartData = [
-    {
-      temp: temperatureValue,
-      humid: humidityValue,
-      tempColor: tempStatusColor,
-      humidColor: humidStatusColor,
-    },
-  ];
-
+interface AppCarbonDioxideChart {
+  maxValue: number;
+  label: string;
+}
+export function AppCarbonDioxideChart({
+  maxValue,
+  label,
+}: AppCarbonDioxideChart) {
+  const [carbonValue, setCarbonValue] = useState(0);
+  const percentage = (carbonValue / maxValue) * 100;
+  const endAngle = (percentage / 100) * 360;
   const [isLgScreen, setIsLgScreen] = useState(false);
 
+  const status = getStatus(carbonValue, "carbonDioxide");
+  const statusColor = getStatusColor(status);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsLgScreen(window.innerWidth >= 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  const chartData = [{ carbonDioxide: carbonValue, fill: statusColor }];
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080");
 
@@ -61,8 +59,7 @@ export function AppTemperatureChart() {
         const msg = JSON.parse(event.data);
 
         if (msg.type === "sensor") {
-          setTemperatureValue(msg.data.temperatureVal);
-          setHumidityValue(msg.data.humidityVal);
+          setCarbonValue(msg.data.carbonDioxideVal);
         }
       } catch (err) {
         console.log("WS JSON ERROR:", err);
@@ -72,24 +69,15 @@ export function AppTemperatureChart() {
     return () => ws.close();
   }, []);
 
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsLgScreen(window.innerWidth >= 1024);
-    };
-
-    checkScreenSize();
-    window.addEventListener("resize", checkScreenSize);
-    return () => window.removeEventListener("resize", checkScreenSize);
-  }, []);
-
   return (
     <ChartContainer
       config={chartConfig}
-      className="mx-auto aspect-square w-full max-w-[250px]"
+      className="mx-auto aspect-square max-h-[250px] pb-0"
     >
       <RadialBarChart
         data={chartData}
-        endAngle={360}
+        startAngle={0}
+        endAngle={endAngle}
         innerRadius={isLgScreen ? 80 : 76}
         outerRadius={isLgScreen ? 140 : 132}
       >
@@ -100,7 +88,7 @@ export function AppTemperatureChart() {
           className="first:fill-muted last:fill-background"
           polarRadius={isLgScreen ? [93, 67] : [90, 64]}
         />
-
+        <RadialBar dataKey="carbonDioxide" background cornerRadius={10} />
         <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
           <Label
             content={({ viewBox }) => {
@@ -117,14 +105,14 @@ export function AppTemperatureChart() {
                       y={viewBox.cy}
                       className="fill-foreground text-4xl font-bold"
                     >
-                      {chartData[0].temp.toLocaleString()}°C
+                      {chartData[0].carbonDioxide.toLocaleString()}
                     </tspan>
                     <tspan
                       x={viewBox.cx}
                       y={(viewBox.cy || 0) + 24}
                       className="fill-muted-foreground"
                     >
-                      Temperature
+                      {label}
                     </tspan>
                   </text>
                 );
@@ -132,30 +120,9 @@ export function AppTemperatureChart() {
             }}
           />
         </PolarRadiusAxis>
-        <RadialBar
-          dataKey="temp"
-          stackId="a"
-          cornerRadius={5}
-          fill={chartData[0].tempColor} // Use temperature status color
-          className="stroke-transparent stroke-2"
-        />
-        <RadialBar
-          dataKey="humid"
-          fill={chartData[0].humidColor} // Use humidity status color
-          stackId="a"
-          cornerRadius={5}
-          className="stroke-transparent stroke-2"
-        />
         <ChartTooltip
-          content={<ChartTooltipContent />}
           cursor={false}
-          defaultIndex={0}
-          wrapperStyle={{
-            transform: "translate(-50%, 0)",
-            left: "50%",
-            top: "70%",
-            position: "absolute",
-          }}
+          content={<ChartTooltipContent hideLabel />}
         />
       </RadialBarChart>
     </ChartContainer>

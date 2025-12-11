@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import AppSidebar from "./components/AppSideBar";
 import Dashboard from "./components/Dashboard";
+import Maintenance from "./components/Maintenance";
 
 function App() {
   return (
@@ -14,7 +15,11 @@ function App() {
           <main className="w-full">
             <NavBar />
             <div className="px-5">
-              <Dashboard />
+              {/* <Dashboard /> */}
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/maintenance" element={<Maintenance />} />
+              </Routes>
             </div>
           </main>
         </SidebarProvider>

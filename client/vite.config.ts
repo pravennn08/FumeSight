@@ -11,4 +11,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    port: 3000,
+    proxy: {
+      "/api": {
+        target: "https://localhost:5000",
+        changeOrigin: true,
+      },
+    },
+  },
 });
